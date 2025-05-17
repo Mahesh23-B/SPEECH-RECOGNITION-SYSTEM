@@ -1,25 +1,39 @@
 # app.py
-import streamlit as st
-import tempfile
-from transcriber import transcribe_wav2vec
 
+# Import necessary libraries
+import streamlit as st                    # For building the web app UI
+import tempfile                           # For creating a temporary file to store the uploaded audio
+from transcriber import transcribe_wav2vec  # Import the transcription function from the transcriber module
+
+# Set up the Streamlit app page configuration
 st.set_page_config(page_title="Speech Recognition with Wav2Vec2", layout="centered")
+
+# Display the title and a brief description
 st.title("🗣️ Speech Recognition System")
 st.markdown("Upload a WAV audio file and get the transcribed text using Facebook's Wav2Vec2 model.")
 
+# File uploader to allow users to upload a .wav audio file
 uploaded_file = st.file_uploader("Upload your audio file (.wav)", type=["wav"])
 
+# Check if the user has uploaded a file
 if uploaded_file is not None:
+    # Create a temporary file to store the uploaded audio
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(uploaded_file.read())
-        tmp_path = tmp.name
+        tmp.write(uploaded_file.read())   # Write the uploaded file content to the temp file
+        tmp_path = tmp.name               # Store the path of the temporary file
 
+    # Display the uploaded audio in the app with playback controls
     st.audio(uploaded_file, format="audio/wav")
     
+    # Show a spinner while the transcription is in progress
     with st.spinner("Transcribing..."):
         try:
+            # Attempt to transcribe the audio using the imported function
             transcription = transcribe_wav2vec(tmp_path)
-            st.success("✅ Transcription completed:")
-            st.text_area("Transcribed Text", transcription, height=150)
+            st.success("✅ Transcription completed:")    # Show success message
+            st.text_area("Transcribed Text", transcription, height=150)  # Display the transcribed text
+
         except Exception as e:
+            # Handle and display any errors that occur during transcription
+            # This can catch issues like file read errors, model errors, audio format problems, etc.
             st.error(f"❌ Error during transcription: {e}")
