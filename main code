@@ -1,0 +1,25 @@
+# app.py
+import streamlit as st
+import tempfile
+from transcriber import transcribe_wav2vec
+
+st.set_page_config(page_title="Speech Recognition with Wav2Vec2", layout="centered")
+st.title("🗣️ Speech Recognition System")
+st.markdown("Upload a WAV audio file and get the transcribed text using Facebook's Wav2Vec2 model.")
+
+uploaded_file = st.file_uploader("Upload your audio file (.wav)", type=["wav"])
+
+if uploaded_file is not None:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(uploaded_file.read())
+        tmp_path = tmp.name
+
+    st.audio(uploaded_file, format="audio/wav")
+    
+    with st.spinner("Transcribing..."):
+        try:
+            transcription = transcribe_wav2vec(tmp_path)
+            st.success("✅ Transcription completed:")
+            st.text_area("Transcribed Text", transcription, height=150)
+        except Exception as e:
+            st.error(f"❌ Error during transcription: {e}")
